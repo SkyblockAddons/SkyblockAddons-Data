@@ -1,0 +1,28 @@
+name: SkyblockAddons Translation Progress Update
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+
+jobs:
+  TranslationProgressUpdate:
+    name: Update SkyblockAddons Translation Progress
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - shell: bash
+      env:
+        CROWDIN_AUTH: ${{ secrets.CROWDIN_AUTH }}
+        GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+      run: |
+        curl -X GET https://crowdin.com/api/v2/projects/369493/languages/progress?limit=500 -H "Authorization: Bearer $CROWDIN_AUTH" -o translationProgress.json
+        git config user.name "Github Actions"
+        git config user.email "$GIT_EMAIL"
+        git fetch
+        git checkout data
+        git add --all
+        git commit -m "chore(SkyblockAddons): update translation progress"
+        git push
+      continue-on-error: true
